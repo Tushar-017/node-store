@@ -21,7 +21,9 @@ app.use(shopRoutes)
 
 app.use(errorController.get404)
 
-app.listen(3000)
+app.listen(3000, () => {
+  console.log("Server is running on port 3000")
+})
 
 // module.exports = path.dirname(process.mainModule.filename)
 // module.exports = path.dirname(require.main.filename)
