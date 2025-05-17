@@ -7,7 +7,7 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const errorController = require("./controllers/error");
 
-// const User = require("./models/user")
+const User = require("./models/user");
 
 const app = express();
 
@@ -19,14 +19,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // static middleware...there can be more than one static middle ware
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use((req, res, next) => {
-//   User.findById("67f2c6f5c5d6f6f3353d6f7c")
-//     .then((user) => {
-//       req.user = new User(user.name, user.email, user.cart, user._id)
-//       next()
-//     })
-//     .catch((err) => console.log(err))
-// })
+app.use((req, res, next) => {
+  User.findById("6825649200d64817a76ebc44")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -42,6 +42,19 @@ mongoose
     "mongodb+srv://tusharN2025:Lnkm7C36q2gcN3QR@cluster0.mzcrxxm.mongodb.net/shopMongoos?retryWrites=true&w=majority&appName=Cluster0"
   )
   .then((result) => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: "Max",
+          email: "max@test.com",
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
+
     app.listen(3000);
   })
   .catch((err) => {
