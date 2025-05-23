@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 
@@ -41,9 +42,7 @@ app.use(errorController.get404);
 // })
 
 mongoose
-  .connect(
-    "mongodb+srv://tusharN2025:Lnkm7C36q2gcN3QR@cluster0.mzcrxxm.mongodb.net/shopMongoos?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(process.env.MONGODB_URI)
   .then((result) => {
     User.findOne().then((user) => {
       if (!user) {
