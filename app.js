@@ -4,6 +4,8 @@ const path = require("path");
 
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -13,7 +15,10 @@ const errorController = require("./controllers/error");
 const User = require("./models/user");
 
 const app = express();
-
+const store = new MongoDBStore({
+  uri: process.env.MONGODB_URI,
+  collection: "sessions",
+});
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -21,9 +26,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // express will check if any request is asking for the static file it will directly target the public folder
 // static middleware...there can be more than one static middle ware
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
+);
 
 app.use((req, res, next) => {
-  User.findById("6825649200d64817a76ebc44")
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user?._id)
     .then((user) => {
       req.user = user;
       next();
@@ -36,10 +52,6 @@ app.use(shopRoutes);
 app.use(authRoutes);
 
 app.use(errorController.get404);
-
-// mongoConnect(() => {
-//   app.listen(3000)
-// })
 
 mongoose
   .connect(process.env.MONGODB_URI)
